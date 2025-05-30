@@ -1,0 +1,39 @@
+version: "3.3"
+
+services:
+  postgres:
+    container_name: storage
+    image: postgres:latest
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./assets/postgres/init.sql:/docker-entrypoint-initdb.d/1-schema.sql
+    environment: 
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "sharing_machines"
+
+    ports:
+      - "5432:5432"
+    networks:
+      - netw
+
+  backend:
+    build:
+      context: .
+      dockerfile: ./docker/app.Dockerfile
+    container_name: backend
+    hostname: backend
+    platform: linux/x86_64
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - netw
+
+networks:
+  netw:
+    name: custom_netw
+
+volumes:
+  pgdata:
